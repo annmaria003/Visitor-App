@@ -13,10 +13,20 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class AddVisitor extends AppCompatActivity {
 
     EditText fName, lName, purp, meet;
     Button submitButton, backButton;
+
+    String FirstName,LastName,Purpose,Meet;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,13 +43,42 @@ public class AddVisitor extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String FirstName = fName.getText().toString();
-                String LastName = lName.getText().toString();
-                String Purpose = purp.getText().toString();
-                String Meet = meet.getText().toString();
+                FirstName = fName.getText().toString();
+                LastName = lName.getText().toString();
+                Purpose = purp.getText().toString();
+                Meet = meet.getText().toString();
 
-                Toast.makeText(getApplicationContext(),FirstName+" "+LastName+" "+Purpose+" "+Meet,Toast.LENGTH_LONG).show();
+                if(FirstName.isEmpty()||LastName.isEmpty()||Purpose.isEmpty()||Meet.isEmpty()){
+                    Toast.makeText(getApplicationContext(),"All the fields are mandatory",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    CallApi();
+                }
             }
+
+            private void CallApi() {
+                String apiUrl="https://log-app-demo-api.onrender.com/addvisitor";
+                JSONObject data = new JSONObject();
+                try {
+                    data.put("firstname",FirstName);
+                    data.put("lastname",LastName);
+                    data.put("purpose",Purpose);
+                    data.put("whomToMeet",Meet);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                JsonObjectRequest request = new JsonObjectRequest(
+                        Request.Method.POST,
+                        apiUrl,
+                        data,
+                        response ->Toast.makeText(getApplicationContext(),"succesfully added",Toast.LENGTH_LONG).show(),
+                        error -> Toast.makeText(getApplicationContext(),"Something went wrong!",Toast.LENGTH_LONG).show()
+                );
+
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                queue.add(request);
+            }
+
         });
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -47,7 +86,6 @@ public class AddVisitor extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
-                finish();
             }
         });
 
